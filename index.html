@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Reach — Auto-Setup for Claude Code</title>
+<style>
+  :root {
+    --bg: #0b0d10;
+    --panel: #14171c;
+    --border: #262b33;
+    --text: #e7e9ec;
+    --muted: #9aa3af;
+    --accent: #7dd3fc;
+    --accent-strong: #38bdf8;
+    --ok: #4ade80;
+    --warn: #fbbf24;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --border: #e3e6eb;
+      --text: #14171c;
+      --muted: #5b6472;
+      --accent: #0369a1;
+      --accent-strong: #0284c7;
+      --ok: #16a34a;
+      --warn: #b45309;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    line-height: 1.55;
+  }
+  main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 64px 24px 96px;
+  }
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  h1 {
+    font-size: clamp(28px, 4vw, 40px);
+    margin: 10px 0 8px;
+    letter-spacing: -0.01em;
+  }
+  .lede {
+    color: var(--muted);
+    font-size: 17px;
+    max-width: 60ch;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 26px;
+    margin-top: 28px;
+  }
+  .card h2 {
+    margin-top: 0;
+    font-size: 17px;
+  }
+  code, pre {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+  }
+  pre {
+    background: rgba(125, 211, 252, 0.08);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  ul.status {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 8px;
+  }
+  ul.status li {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ok);
+    margin-top: 6px;
+  }
+  .dot.warn { background: var(--warn); }
+  .status b { font-weight: 600; }
+  .status span.detail { color: var(--muted); font-size: 14px; }
+  footer {
+    margin-top: 40px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  a { color: var(--accent-strong); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">MFave-xtc / agent-reach</div>
+  <h1>Agent Reach auto-setup for Claude Code</h1>
+  <p class="lede">
+    This repository configures a <code>SessionStart</code> hook so that
+    <a href="https://code.claude.com/docs/en/claude-code-on-the-web">Claude Code on the web</a>
+    automatically installs and checks
+    <a href="https://github.com/Panniantong/agent-reach">Agent Reach</a> —
+    an internet-access toolkit and router for AI agents — every time a
+    session opens on this project.
+  </p>
+
+  <div class="card">
+    <h2>How it works</h2>
+    <p>
+      On every session start, resume, or compact, Claude Code runs
+      <code>.claude/hooks/session-start.sh</code>, which:
+    </p>
+    <pre>1. Installs pipx (if missing)
+2. Clones/installs Agent Reach via pipx (local clone, since the
+   GitHub archive zip URL is blocked by this environment's proxy)
+3. Installs yt-dlp
+4. Runs the safe, read-only  agent-reach install --env=auto  check</pre>
+    <p>
+      System-level installs (<code>--system</code>) and any cookie-based
+      channels (Twitter, Reddit, etc.) still require explicit approval
+      each session — the hook never makes changes without asking.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Zero-config channels</h2>
+    <ul class="status">
+      <li><span class="dot"></span><div><b>Web pages</b> — via Jina Reader <span class="detail">(curl https://r.jina.ai/URL)</span></div></li>
+      <li><span class="dot"></span><div><b>RSS / Atom feeds</b></div></li>
+      <li><span class="dot"></span><div><b>YouTube</b> — video info and transcripts <span class="detail">(after --system install)</span></div></li>
+      <li><span class="dot warn"></span><div><b>GitHub</b> — repos and code <span class="detail">(gh CLI, needs auth)</span></div></li>
+      <li><span class="dot warn"></span><div><b>Semantic web search</b> — via Exa <span class="detail">(needs OAuth approval)</span></div></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Files</h2>
+    <pre>.claude/hooks/session-start.sh   the hook script
+.claude/settings.json            registers the SessionStart hook</pre>
+  </div>
+
+  <footer>
+    Source: <a href="https://github.com/MFave-xtc/agent-reach">MFave-xtc/agent-reach</a>
+    · Upstream project: <a href="https://github.com/Panniantong/agent-reach">Panniantong/agent-reach</a>
+  </footer>
+</main>
+</body>
+</html>
